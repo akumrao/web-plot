@@ -9,37 +9,26 @@
 
 #ifdef __ANDROID__
 #include "SDL.h"
-#define APP_NAME "plot_sdl_impl"
+#define APP_NAME "web-plot"
 #else
 #include "SDL2/SDL.h"
 #endif
 #include <list>
 #include "linked_list.h"
-
+/// text inside box( for eg. load and download)
 #define DOT_RADIUS                    6
 #define CAPTION_OFFSET_CIRCLE_TO_TEXT 10
 #define CAPTION_OFFSET_DELIMITER      40
 #define GRADUATION_HEIGTH             10
-#define CAPTION_Y_LABEL_OFFSET        10
-#define CAPTION_MARGIN                30
-
-
+//#define CAPTION_Y_LABEL_OFFSET        10
+#define CAPTION_MARGIN                0
 
 
 
 //-------------Plot SDL objects structure  ------------
 
 typedef struct plot_struct {
-    //TTF_Font     *font                 ;
     SDL_Window *screen;
-    //SDL_Surface  *plot_surface         ;
-    //SDL_Surface  *plot_mask_surface    ;
-    //SDL_Surface  *caption_surface      ;
-    //SDL_Surface  *caption_mask_surface ;
-    //SDL_Surface  *captionX             ;
-    //SDL_Surface  *captionY             ;
-    //SDL_Texture  *textureX             ;
-    //SDL_Texture  *textureY             ;
     SDL_Renderer *renderer;
 
 } splot;
@@ -58,7 +47,9 @@ public:
 
     int plot_graph(Plot_Window_params *params, const char *title);
 
-    static void  mainloop(void *arg);
+    static void mainloop(void *arg);
+
+     static int run(void *arg);
 
     /**
      * @brief draw_scale_graduation
@@ -185,13 +176,16 @@ private:
 
 
     splot plot;
-    
+
     Plot_Window_params *win_params;
 
     int nWindows;
 
     int nHoriz;
     int nVert;
+    
+public:
+    volatile static int keepRunning;
 
 };
 
