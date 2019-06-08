@@ -112,7 +112,47 @@ int main(int argc, char* argv[]) {
         plotwin_list = push_back_plot_win(plotwin_list, params);
 
     }
+    {
+        //populate caption list
+        captionlist caption_list = NULL;
 
+        caption_list = push_back_caption(caption_list, "live", 0, 0x0000FF);
+
+
+        //print_list_caption(caption_list);
+
+        //populate coordinate list
+        coordlist coordinate_list = NULL;
+
+        coordinate_list = push_back_coord(coordinate_list, 0, -5, -2);
+        coordinate_list = push_back_coord(coordinate_list, 0, -4, -9);
+        coordinate_list = push_back_coord(coordinate_list, 0, -3, -9);
+        coordinate_list = push_back_coord(coordinate_list, 0, -2, -3);
+        coordinate_list = push_back_coord(coordinate_list, 0, -1, -8);
+        coordinate_list = push_back_coord(coordinate_list, 0, 0, 0);
+        coordinate_list = push_back_coord(coordinate_list, 0, 0, 9);
+        coordinate_list = push_back_coord(coordinate_list, 0, 1, 5);
+        coordinate_list = push_back_coord(coordinate_list, 0, 2, 12);
+        coordinate_list = push_back_coord(coordinate_list, 0, 3, 18);
+        coordinate_list = push_back_coord(coordinate_list, 0, 4, 3);
+
+
+        //populate plot parameter object
+        plot_params *params = new plot_params("Time (s)", "Speed (Mbit/s)", caption_list, coordinate_list);
+
+         
+
+        params->scale.x = 1;
+        params->scale.y = 2;
+        params->max.x = +5;
+        params->max.y = 20;
+        params->min.x = -5;
+        params->min.y = -10;
+
+        //  Plot_Window_params win_param;
+        plotwin_list = push_back_plot_win(plotwin_list, params);
+
+    }
     /*
      {
          //populate caption list

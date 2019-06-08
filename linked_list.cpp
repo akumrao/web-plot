@@ -163,55 +163,9 @@ void print_list_coord(coordlist list) {
 
 }
 
-/**
- * @brief clear_surface
- *      clear surface table
- * @param list
- *      list of surface items
- */
-surfacelist clear_surface(surfacelist list) {
 
-    if (list != NULL) {
-        surface_item * current = list;
-        surface_item * next;
 
-        while (current != NULL) {
-            next = current->nxt;
-            SDL_FreeSurface(current->surface);
-            free(current);
-            current = next;
-        }
 
-        list = NULL;
-    }
-    return list;
-}
-
-/**
- * @brief push_back_surface
- *      push a new item to the end of surface table
- * @param list
- *      list of surface items
- * @param surface
- *      SDL surface ptr
- */
-surfacelist push_back_surface(surfacelist list, SDL_Surface* surface) {
-    surface_item* surface_new_item = (surface_item*) malloc(sizeof (surface_item));
-    surface_new_item->surface = surface;
-
-    surface_new_item->nxt = NULL;
-
-    if (list == NULL) {
-        return surface_new_item;
-    } else {
-        surface_item* temp = list;
-        while (temp->nxt != NULL) {
-            temp = temp->nxt;
-        }
-        temp->nxt = surface_new_item;
-        return list;
-    }
-}
 
 /**
  * @brief clear_surface

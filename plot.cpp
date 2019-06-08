@@ -32,32 +32,35 @@
 #include <emscripten/emscripten.h>
 #endif
 
-volatile int Plot::keepRunning=0;
+volatile int Plot::keepRunning = 0;
+
 int Plot::run(void *arg) {
-    
+
     keepRunning = 2;
     while (keepRunning > 1) {
 
         mainloop(arg);
         SDL_Delay(1000);
     }
-    
+
     keepRunning = 0;
 }
 
 void Plot::mainloop(void *arg) {
     Plot *ctx = static_cast<Plot*> (arg);
 
-    /* 
+    static int x =0 ;
+    x = ++x%5;
+     
        coordlist coordinate_list = NULL;
 
        for (int i = 0; i < 9; ++i) {
-           coordinate_list = push_back_coord(coordinate_list, 0, i, 10 + i % 3);
+           coordinate_list = push_back_coord(coordinate_list, 0, i, 10 +x +i % 3);
            coordinate_list = push_back_coord(coordinate_list, 1, i, 8 + i % 3);
        }
 
        ctx->win_params->plotparm->coordinate_list = coordinate_list;
-     */
+       ctx->win_params->plotparm->update = true;
 
     ctx->draw_window(&ctx->plot, ctx->win_params);
 
@@ -81,7 +84,7 @@ Plot::Plot() : nWindows(0) {
 
     if (SDL_Init(SDL_INIT_VIDEO) == -1) {
 
-        myPrintf( "Error SDL init failure : %s\n", SDL_GetError());
+        myPrintf("Error SDL init failure : %s\n", SDL_GetError());
     }
 
     plot.screen = NULL;
@@ -133,24 +136,33 @@ int Plot::plot_graph(Plot_Window_params *win_params, const char *title) {
     //emscripten_cancel_main_loop();
     // SDL_Delay(1500);
     SDL_CreateWindowAndRenderer(params->screen_width* nHoriz, params->screen_heigth*nVert, 0, &plot.screen, &plot.renderer);
+    //------------ background-----------------------
+    SDL_SetRenderDrawColor(plot.renderer, 255, 255, 255, 255);
+    /* Clear the entire screen to our white color. */
+    SDL_RenderClear(plot.renderer);
     const int simulate_infinite_loop = 1; // call the function repeatedly
     const int fps = -1; // call the function as fast as the browser wants to render (typically 60fps)
     emscripten_set_main_loop_arg(&Plot::mainloop, this, fps, simulate_infinite_loop);
 
 #else
-    
 
-     plot.screen = SDL_CreateWindow(
-                title,
-                SDL_WINDOWPOS_UNDEFINED,
-                SDL_WINDOWPOS_UNDEFINED,
-                params->screen_width* nHoriz,
-                params->screen_heigth*nVert,
-                SDL_WINDOW_SHOWN);
-     
-     //SDL_SetWindowFullscreen(plot.screen,SDL_WINDOW_FULLSCREEN);
+
+    plot.screen = SDL_CreateWindow(
+            title,
+            SDL_WINDOWPOS_UNDEFINED,
+            SDL_WINDOWPOS_UNDEFINED,
+            params->screen_width* nHoriz,
+            params->screen_heigth*nVert,
+            SDL_WINDOW_SHOWN);
+
+    //SDL_SetWindowFullscreen(plot.screen,SDL_WINDOW_FULLSCREEN);
 
     plot.renderer = SDL_CreateRenderer(plot.screen, 0, 0);
+
+    //------------ background-----------------------
+    SDL_SetRenderDrawColor(plot.renderer, 255, 255, 255, 255);
+    /* Clear the entire screen to our white color. */
+    SDL_RenderClear(plot.renderer);
     wait_for_sdl_event();
 #endif
 
@@ -187,10 +199,7 @@ void Plot::clean_plot(splot *plot, plot_params *params) {
 void Plot::draw_window(splot *plot, Plot_Window_params *win_params) {
 
     if (plot->screen != NULL) {
-        //------------ background-----------------------
-        SDL_SetRenderDrawColor(plot->renderer, 255, 255, 255, 255);
-        /* Clear the entire screen to our white color. */
-        SDL_RenderClear(plot->renderer);
+
 
         int w;
         int h;
@@ -200,43 +209,51 @@ void Plot::draw_window(splot *plot, Plot_Window_params *win_params) {
         int count = 0;
         while (win_params) {
 
-          
-            w = win_params->plotparm->screen_width;
-            h = win_params->plotparm->screen_heigth;
-            SDL_Texture *parentTarget = SDL_GetRenderTarget(plot->renderer);
+            if (win_params->plotparm->update) {
 
-            SDL_Texture *texTarget = SDL_CreateTexture(plot->renderer, SDL_PIXELFORMAT_RGBA8888,
-                    SDL_TEXTUREACCESS_TARGET, w, h);
-           
-            SDL_Rect srect = {0, 0, w, h};
-            SDL_SetRenderTarget(plot->renderer, texTarget);
-            SDL_SetRenderDrawColor(plot->renderer, 255, 255, 255, 255);
-            SDL_RenderClear(plot->renderer);
-            //SDL_SetTextureBlendMode(texTarget, SDL_BLENDMODE_BLEND);
-            /////////////////////////////////////////////////
-            /// Draw one plot
-            draw_plot(plot, win_params->plotparm);
-            //// End one plot
-            /////////////////////////////////////////////////
-           
-            win_params = win_params->nxt;
+                win_params->plotparm->update = false;
 
-            //Now render the texture target to our screen, but upside down
-            SDL_SetRenderTarget(plot->renderer, parentTarget);
+                w = win_params->plotparm->screen_width;
+                h = win_params->plotparm->screen_heigth;
+                SDL_Texture *parentTarget = SDL_GetRenderTarget(plot->renderer);
 
-            SDL_Rect drect = {col*w, row*h, w, h};
+                if (!win_params->plotparm->texTarget)
+                    win_params->plotparm->texTarget = SDL_CreateTexture(plot->renderer, SDL_PIXELFORMAT_RGBA8888,
+                        SDL_TEXTUREACCESS_TARGET, w, h);
 
-            printf(" win=%d, col = %d, row=%d \n", count, col, row);
+                SDL_Rect srect = {0, 0, w, h};
+                SDL_SetRenderTarget(plot->renderer, win_params->plotparm->texTarget);
+                SDL_SetRenderDrawColor(plot->renderer, 255, 255, 255, 255);
+                /* Clear the entire screen to our white color. */
+                SDL_RenderClear(plot->renderer);
+                //SDL_SetTextureBlendMode(texTarget, SDL_BLENDMODE_BLEND);
+                /////////////////////////////////////////////////
+                /// Draw one plot
+                draw_plot(plot, win_params->plotparm);
+                //// End one plot
+                /////////////////////////////////////////////////
 
 
-            SDL_RenderCopy(plot->renderer, texTarget, &srect, &drect);
+                //Now render the texture target to our screen, but upside down
+                SDL_SetRenderTarget(plot->renderer, parentTarget);
+
+                SDL_Rect drect = {col*w, row*h, w, h};
+
+                myPrintf(" win=%d, col = %d, row=%d \n", count, col, row);
+
+
+                SDL_RenderCopy(plot->renderer, win_params->plotparm->texTarget, &srect, &drect);
+
+
+            }
+
             ++count;
 
             row = (int) (count) / nHoriz;
             col = count % nHoriz;
 
-            SDL_DestroyTexture(texTarget);
-
+            //   SDL_DestroyTexture(texTarget);
+            win_params = win_params->nxt;
 
         }
 
@@ -269,39 +286,39 @@ void Plot::draw_plot(splot *plot, plot_params *params) {
         float plot_width = params->screen_width * 0.8;
         float plot_heigth = params->screen_heigth * 0.8;
         float plot_caption_heigth = params->screen_heigth * 0.05;
-        
-         SDL_Rect scree_position;
+
+        SDL_Rect scree_position;
         scree_position.x = 0;
         scree_position.y = 0;
         scree_position.w = params->screen_width;
         scree_position.h = params->screen_heigth;
-        
+
 
         SDL_SetRenderDrawColor(plot->renderer, 0, 255, 0, 255);
-        SDL_RenderDrawRect(plot->renderer,  &scree_position  );
+        SDL_RenderDrawRect(plot->renderer, &scree_position);
         //SDL_RenderFillRect(plot->renderer, &scree_position);
-        
+
         SDL_Rect plot_position;
         plot_position.x = (params->screen_width / 2)-(plot_width * 0.47);
         plot_position.y = (params->screen_heigth * 0.50)-(plot_heigth / 2);
         plot_position.w = plot_width;
         plot_position.h = plot_heigth;
-        
-     //   SDL_SetRenderDrawColor(plot->renderer, 255, 0, 0, 255);
-       // SDL_RenderDrawRect(plot->renderer,  &plot_position  );
-      //  SDL_RenderFillRect(plot->renderer, &plot_position);
 
-       
-  
+        //   SDL_SetRenderDrawColor(plot->renderer, 255, 0, 0, 255);
+        // SDL_RenderDrawRect(plot->renderer,  &plot_position  );
+        //  SDL_RenderFillRect(plot->renderer, &plot_position);
+
+
+
         SDL_Rect plot_caption_position;
         plot_caption_position.x = plot_position.x;
         plot_caption_position.y = plot_position.y - 20 - plot_caption_heigth;
         plot_caption_position.w = plot_width;
         plot_caption_position.h = plot_caption_heigth;
-        
-        SDL_SetRenderDrawColor(plot->renderer, 255, 255, 0, 255);
-        SDL_RenderDrawRect(plot->renderer,  &plot_caption_position  );
-        SDL_RenderFillRect(plot->renderer, &plot_caption_position);
+
+      // SDL_SetRenderDrawColor(plot->renderer, 255, 255, 0, 255);
+      //  SDL_RenderDrawRect(plot->renderer, &plot_caption_position);
+      //  SDL_RenderFillRect(plot->renderer, &plot_caption_position);
 
 
         SDL_Rect caption_y_position;
@@ -435,7 +452,7 @@ void Plot::draw_points(
 
     while (tmp != NULL) {
         if (tmp->caption_id == caption_item->caption_id) {
-            float circle_x1 = plot_mask_position.x + 1 + ((tmp->x - params->min.x) / params->scale.x) * scale_x_num;
+            float circle_x1 = plot_mask_position.x  + ((tmp->x - params->min.x) / params->scale.x) * scale_x_num;
             float circle_y1 = plot_mask_position.y + plot_heigth - ((tmp->y - params->min.y) / params->scale.y) * scale_y_num;
 
             SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
@@ -529,7 +546,7 @@ void Plot::draw_scale_graduation(SDL_Renderer * renderer,
         }
 
         char text[10];
-        sprintf(text, "%d", (int)current_scale);
+        sprintf(text, "%d", (int) current_scale);
 
         //        SDL_Surface *caption_text_surface = TTF_RenderText_Blended(font, text, font_color);
         SDL_Rect caption_text;
@@ -556,8 +573,8 @@ void Plot::draw_scale_graduation(SDL_Renderer * renderer,
     double max_point_number_y = (params->max.y / params->scale.y);
     double min_point_number_y = (params->min.y / params->scale.y);
 
-    init_pos_x = plot_mask_position.x ;
-    init_pos_y = plot_mask_position.y + plot_heigth ;
+    init_pos_x = plot_mask_position.x;
+    init_pos_y = plot_mask_position.y + plot_heigth;
 
     for (int i = min_point_number_y; i < max_point_number_y + 1; i++) {
 
@@ -571,7 +588,7 @@ void Plot::draw_scale_graduation(SDL_Renderer * renderer,
         }
 
         char text[10];
-        sprintf(text, "%d", (int)current_scale);
+        sprintf(text, "%d", (int) current_scale);
 
         //        SDL_Surface *caption_text_surface = TTF_RenderText_Blended(font, text, font_color);
         SDL_Rect caption_text;
@@ -593,7 +610,7 @@ void Plot::draw_scale_graduation(SDL_Renderer * renderer,
 
         current_scale += params->scale.y;
 
-        regular_caption_text_width = FONT_CHARACTER_SIZE+2;
+        regular_caption_text_width = FONT_CHARACTER_SIZE + 2;
     }
 
     //caption y
@@ -612,7 +629,7 @@ void Plot::draw_scale_graduation(SDL_Renderer * renderer,
     text_caption_x.w = FONT_CHARACTER_SIZE * strlen(params->caption_text_x);
     text_caption_x.h = FONT_CHARACTER_SIZE + 2;
     text_caption_x.x = params->screen_width / 2 - text_caption_x.w / 2;
-    text_caption_x.y = plot_position_y + plot_heigth +5+ 1 * regular_caption_text_heigth;
+    text_caption_x.y = plot_position_y + plot_heigth + 5 + 1 * regular_caption_text_heigth;
     //SDL_RenderCopy(plot->renderer, plot->textureX, NULL, &text_caption_x);
     SDL_DrawString(renderer, text_caption_x.x, text_caption_x.y, params->caption_text_x, 8, &font_color);
 
@@ -625,12 +642,11 @@ void Plot::draw_scale_graduation(SDL_Renderer * renderer,
  */
 void Plot::wait_for_sdl_event() {
 
-
     SDL_Event event;
 
     keepRunning = 2;
 
-   // SDL_Thread * thread = SDL_CreateThread(&run, "run", (void *) this);
+    // SDL_Thread * thread = SDL_CreateThread(&run, "run", (void *) this);
     while (keepRunning) {
 
         SDL_PollEvent(&event);
@@ -642,10 +658,10 @@ void Plot::wait_for_sdl_event() {
                 break;
             default:
             {
-               myPrintf(" Polling for events %d\n", event.type);
+                myPrintf(" Polling for events\n");
 
-                 mainloop( this);
-                 SDL_Delay(100);
+                mainloop(this);
+                SDL_Delay(50);
                 break;
             }
         };
@@ -731,6 +747,8 @@ void Plot::fill_circle(SDL_Renderer *renderer, int cx, int cy, int radius) {
     //   http://www.libsdl.org/intro.en/usingvideo.html
     static const int BPP = 4;
 
+    // SDL_RenderSetScale( renderer, 3, 3 );
+
     double r = (double) radius;
 
     double dy = 0;
@@ -752,4 +770,6 @@ void Plot::fill_circle(SDL_Renderer *renderer, int cx, int cy, int radius) {
             SDL_RenderDrawPoint(renderer, x, ((int) (cy - r + dy)));
         }
     }
+
+    // SDL_RenderSetScale( renderer, 1, 1);
 }

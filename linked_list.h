@@ -109,15 +109,6 @@ struct Coordinate_item {
 typedef Coordinate_item* coordlist;
 //----------------------------------------
 
-//-------------SDL_Surface STRUCT ------------
-typedef struct surface_item surface_item;
-
-struct surface_item {
-    SDL_Surface * surface;
-    struct surface_item *nxt;
-};
-
-typedef surface_item* surfacelist;
 
 
 //-------------Plot parameter structure  ------------
@@ -132,14 +123,14 @@ typedef struct Plot_params_struct {
     const char * caption_text_y;
     captionlist caption_list;
     coordlist coordinate_list;
-
+    SDL_Texture *texTarget;
     Pair scale;
     Pair max;
     Pair min;
     bool dot;
     bool grid;
-
-    Plot_params_struct(const char * caption_x, const char * caption_y, captionlist caption_lst, coordlist coordinate_lst) {
+    bool update;
+    Plot_params_struct(const char * caption_x, const char * caption_y, captionlist caption_lst, coordlist coordinate_lst) : update(true),texTarget(NULL) {
         screen_width = 400;
         screen_heigth = 400;
         dot = true;
@@ -216,7 +207,7 @@ coordlist clear_coord(coordlist list);
 /**
  * @brief push_back_caption
  *      push a new item to the end of caption table
- * @param list
+ * @param list std::vector< SDL_Point > points;
  *      list of caption items
  * @param caption_txt
  *      caption text
@@ -251,7 +242,7 @@ captionlist clear_caption(captionlist list);
  * @param surface
  *      SDL surface ptr
  */
-surfacelist push_back_surface(surfacelist list, SDL_Surface* surface);
+
 
 /**
  * @brief clear_surface
@@ -259,7 +250,7 @@ surfacelist push_back_surface(surfacelist list, SDL_Surface* surface);
  * @param list
  *      list of surface items
  */
-surfacelist clear_surface(surfacelist list);
+
 
 
 plotwinlist push_back_plot_win(plotwinlist list, plot_params* plotparm);
