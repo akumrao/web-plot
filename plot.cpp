@@ -81,7 +81,7 @@ Plot::Plot() : nWindows(0) {
 
     if (SDL_Init(SDL_INIT_VIDEO) == -1) {
 
-        fprintf(stderr, "Error SDL init failure : %s\n", SDL_GetError());
+        myPrintf( "Error SDL init failure : %s\n", SDL_GetError());
     }
 
     plot.screen = NULL;
@@ -97,7 +97,6 @@ int Plot::plot_graph(Plot_Window_params *win_params, const char *title) {
 
     plot_params *params = win_params->plotparm;
     this->win_params = win_params;
-
 
     nHoriz = nWindows;
     nVert = nWindows;
@@ -124,23 +123,34 @@ int Plot::plot_graph(Plot_Window_params *win_params, const char *title) {
             break;
 
         default:
-            printf("Maxium Plot Screen supported 8\n");
+            myPrintf("Error, Plot Screens supported 1 - 8, you you screens %d\n", nWindows);
             return -1;
     };
 
-
-    SDL_CreateWindowAndRenderer(params->screen_width* nHoriz, params->screen_heigth*nVert, 0, &plot.screen, &plot.renderer);
 
 
 #ifdef __EMSCRIPTEN__
     //emscripten_cancel_main_loop();
     // SDL_Delay(1500);
-
+    SDL_CreateWindowAndRenderer(params->screen_width* nHoriz, params->screen_heigth*nVert, 0, &plot.screen, &plot.renderer);
     const int simulate_infinite_loop = 1; // call the function repeatedly
     const int fps = -1; // call the function as fast as the browser wants to render (typically 60fps)
     emscripten_set_main_loop_arg(&Plot::mainloop, this, fps, simulate_infinite_loop);
 
 #else
+    
+
+     plot.screen = SDL_CreateWindow(
+                title,
+                SDL_WINDOWPOS_UNDEFINED,
+                SDL_WINDOWPOS_UNDEFINED,
+                params->screen_width* nHoriz,
+                params->screen_heigth*nVert,
+                SDL_WINDOW_SHOWN);
+     
+     //SDL_SetWindowFullscreen(plot.screen,SDL_WINDOW_FULLSCREEN);
+
+    plot.renderer = SDL_CreateRenderer(plot.screen, 0, 0);
     wait_for_sdl_event();
 #endif
 
@@ -277,9 +287,9 @@ void Plot::draw_plot(splot *plot, plot_params *params) {
         plot_position.w = plot_width;
         plot_position.h = plot_heigth;
         
-        SDL_SetRenderDrawColor(plot->renderer, 255, 0, 0, 255);
-        SDL_RenderDrawRect(plot->renderer,  &plot_position  );
-        SDL_RenderFillRect(plot->renderer, &plot_position);
+     //   SDL_SetRenderDrawColor(plot->renderer, 255, 0, 0, 255);
+       // SDL_RenderDrawRect(plot->renderer,  &plot_position  );
+      //  SDL_RenderFillRect(plot->renderer, &plot_position);
 
        
   
@@ -292,20 +302,6 @@ void Plot::draw_plot(splot *plot, plot_params *params) {
         SDL_SetRenderDrawColor(plot->renderer, 255, 255, 0, 255);
         SDL_RenderDrawRect(plot->renderer,  &plot_caption_position  );
         SDL_RenderFillRect(plot->renderer, &plot_caption_position);
-
-
- 
-      //  SDL_SetRenderDrawColor(plot->renderer, 0, 0, 0, 255);
-     //   SDL_RenderFillRect(plot->renderer, &plot_mask_position);
-
-      //  SDL_SetRenderDrawColor(plot->renderer, 255, 255, 255, 255);
-       // SDL_RenderFillRect(plot->renderer, &plot_position);
-
-      //  SDL_SetRenderDrawColor(plot->renderer, 0, 0, 0, 255);
-       // SDL_RenderFillRect(plot->renderer, &plot_caption_position);
-
-      //  SDL_SetRenderDrawColor(plot->renderer, 255, 255, 255, 255);
-    //    SDL_RenderFillRect(plot->renderer, &plot_caption_position);
 
 
         SDL_Rect caption_y_position;
@@ -597,7 +593,7 @@ void Plot::draw_scale_graduation(SDL_Renderer * renderer,
 
         current_scale += params->scale.y;
 
-        regular_caption_text_width = caption_text.w;
+        regular_caption_text_width = FONT_CHARACTER_SIZE+2;
     }
 
     //caption y
@@ -606,10 +602,7 @@ void Plot::draw_scale_graduation(SDL_Renderer * renderer,
     text_caption_y.h = FONT_CHARACTER_SIZE + 2;
     text_caption_y.x = regular_caption_text_width - 10;
     text_caption_y.y = plot_mask_position.y + plot_heigth / 2 + text_caption_y.w / 4;
-    //rotate caption y
-    // SDL_Point caption_center = {plot_position_x - CAPTION_Y_LABEL_OFFSET, 0};
-    //SDL_RendererFlip flip = SDL_RendererFlip(SDL_FLIP_HORIZONTAL | SDL_FLIP_VERTICAL);
-    //SDL_RenderCopyEx(plot->renderer, plot->textureY, NULL, &text_caption_y, 90, &caption_center, flip);
+
     SDL_DrawString_Flip(renderer, text_caption_y.x, text_caption_y.y, params->caption_text_y, 8, &font_color);
 
     //caption x
@@ -644,14 +637,17 @@ void Plot::wait_for_sdl_event() {
 
         switch (event.type) {
             case SDL_QUIT:
-                keepRunning = 1;
+                keepRunning = 0;
+                myPrintf(" About to quit window\n");
                 break;
             default:
-                printf(" Polling for events\n");
+            {
+               myPrintf(" Polling for events %d\n", event.type);
 
                  mainloop( this);
-                 SDL_Delay(500);
+                 SDL_Delay(100);
                 break;
+            }
         };
     }
 }

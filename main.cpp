@@ -15,60 +15,7 @@ int main(int argc, char* argv[]) {
 
     plotwinlist plotwin_list = NULL;
 
-  {
-        //populate caption list
-        captionlist caption_list = NULL;
 
-        caption_list = push_back_caption(caption_list, "Download", 0, 0x0000FF);
-        caption_list = push_back_caption(caption_list, "Upload", 1, 0xFF0000);
-
-        //print_list_caption(caption_list);
-
-        //populate coordinate list
-        coordlist coordinate_list = NULL;
-
-        coordinate_list = push_back_coord(coordinate_list, 0, 0, 0);
-        coordinate_list = push_back_coord(coordinate_list, 0, 1, 90);
-        coordinate_list = push_back_coord(coordinate_list, 0, 2, 84);
-        coordinate_list = push_back_coord(coordinate_list, 0, 3, 98);
-        coordinate_list = push_back_coord(coordinate_list, 0, 4, 94);
-        coordinate_list = push_back_coord(coordinate_list, 0, 5, 85);
-        coordinate_list = push_back_coord(coordinate_list, 0, 6, 90);
-        coordinate_list = push_back_coord(coordinate_list, 0, 7, 99);
-        coordinate_list = push_back_coord(coordinate_list, 0, 8, 94);
-        coordinate_list = push_back_coord(coordinate_list, 0, 9, 80);
-
-
-        coordinate_list = push_back_coord(coordinate_list, 1, 0, 0);
-        coordinate_list = push_back_coord(coordinate_list, 1, 1, 92);
-        coordinate_list = push_back_coord(coordinate_list, 1, 2, 90);
-        coordinate_list = push_back_coord(coordinate_list, 1, 3, 98);
-        coordinate_list = push_back_coord(coordinate_list, 1, 4, 92);
-        coordinate_list = push_back_coord(coordinate_list, 1, 5, 82);
-        coordinate_list = push_back_coord(coordinate_list, 1, 6, 98);
-        coordinate_list = push_back_coord(coordinate_list, 1, 7, 94);
-        coordinate_list = push_back_coord(coordinate_list, 1, 8, 90);
-        coordinate_list = push_back_coord(coordinate_list, 1, 9, 80);
-
-        //print_list_coord(coordinate_list);
-
-        //populate plot parameter object
-        plot_params *params = new plot_params("Time (s)", "Speed (Mbit/s)", caption_list, coordinate_list);
-
-        // params->screen_width = 500;
-        // params->screen_heigth = 500;
-
-        params->scale.x = 1;
-        params->scale.y = 10;
-        params->max.x = 10;
-        params->max.y = 100;
-
-
-
-        //  Plot_Window_params win_param;
-        plotwin_list = push_back_plot_win(plotwin_list, params);
-
-    } 
     {
         //populate caption list
         captionlist caption_list = NULL;
@@ -104,6 +51,7 @@ int main(int argc, char* argv[]) {
         coordinate_list = push_back_coord(coordinate_list, 1, 8, 90);
         coordinate_list = push_back_coord(coordinate_list, 1, 9, 80);
 
+
         //print_list_coord(coordinate_list);
 
         //populate plot parameter object
@@ -118,83 +66,6 @@ int main(int argc, char* argv[]) {
         params->max.y = 100;
 
 
-
-        //  Plot_Window_params win_param;
-        plotwin_list = push_back_plot_win(plotwin_list, params);
-
-    }    {
-        //populate caption list
-        captionlist caption_list = NULL;
-
-        caption_list = push_back_caption(caption_list, "live", 0, 0x0000FF);
-
-
-        //print_list_caption(caption_list);
-
-        //populate coordinate list
-        coordlist coordinate_list = NULL;
-
-        coordinate_list = push_back_coord(coordinate_list, 0, -5, -2);
-        coordinate_list = push_back_coord(coordinate_list, 0, -4, -9);
-        coordinate_list = push_back_coord(coordinate_list, 0, -3, -9);
-        coordinate_list = push_back_coord(coordinate_list, 0, -2, -3);
-        coordinate_list = push_back_coord(coordinate_list, 0, -1, -8);
-        coordinate_list = push_back_coord(coordinate_list, 0, 0, 0);
-        coordinate_list = push_back_coord(coordinate_list, 0, 0, 9);
-        coordinate_list = push_back_coord(coordinate_list, 0, 1, 5);
-        coordinate_list = push_back_coord(coordinate_list, 0, 2, 12);
-        coordinate_list = push_back_coord(coordinate_list, 0, 3, 18);
-        coordinate_list = push_back_coord(coordinate_list, 0, 4, 3);
-
-        //populate plot parameter object
-        plot_params *params = new plot_params("Time (s)", "Speed (Mbit/s)", caption_list, coordinate_list);
-        
-
-        params->scale.x = 1;
-        params->scale.y = 2;
-        params->max.x = +5;
-        params->max.y = 20;
-        params->min.x = -5;
-        params->min.y = -10;
-
-        //  Plot_Window_params win_param;
-        plotwin_list = push_back_plot_win(plotwin_list, params);
-
-    }
-        {
-        //populate caption list
-        captionlist caption_list = NULL;
-
-        caption_list = push_back_caption(caption_list, "live", 0, 0x0000FF);
-
-
-        //print_list_caption(caption_list);
-
-        //populate coordinate list
-        coordlist coordinate_list = NULL;
-
-        coordinate_list = push_back_coord(coordinate_list, 0, -5, -2);
-        coordinate_list = push_back_coord(coordinate_list, 0, -4, -9);
-        coordinate_list = push_back_coord(coordinate_list, 0, -3, -9);
-        coordinate_list = push_back_coord(coordinate_list, 0, -2, -3);
-        coordinate_list = push_back_coord(coordinate_list, 0, -1, -8);
-        coordinate_list = push_back_coord(coordinate_list, 0, 0, 0);
-        coordinate_list = push_back_coord(coordinate_list, 0, 0, 9);
-        coordinate_list = push_back_coord(coordinate_list, 0, 1, 5);
-        coordinate_list = push_back_coord(coordinate_list, 0, 2, 12);
-        coordinate_list = push_back_coord(coordinate_list, 0, 3, 18);
-        coordinate_list = push_back_coord(coordinate_list, 0, 4, 3);
-
-        //populate plot parameter object
-        plot_params *params = new plot_params("Time (s)", "Speed (Mbit/s)", caption_list, coordinate_list);
-        
-
-        params->scale.x = 1;
-        params->scale.y = 2;
-        params->max.x = +5;
-        params->max.y = 20;
-        params->min.x = -5;
-        params->min.y = -10;
 
         //  Plot_Window_params win_param;
         plotwin_list = push_back_plot_win(plotwin_list, params);
@@ -224,9 +95,11 @@ int main(int argc, char* argv[]) {
         coordinate_list = push_back_coord(coordinate_list, 0, 3, 18);
         coordinate_list = push_back_coord(coordinate_list, 0, 4, 3);
 
+
         //populate plot parameter object
         plot_params *params = new plot_params("Time (s)", "Speed (Mbit/s)", caption_list, coordinate_list);
-        
+
+         
 
         params->scale.x = 1;
         params->scale.y = 2;
