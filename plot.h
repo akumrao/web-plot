@@ -13,7 +13,7 @@
 #else
 #include "SDL2/SDL.h"
 #endif
-#include <list>
+//#include <list>
 #include "linked_list.h"
 /// text inside box( for eg. load and download)
 #define DOT_RADIUS                    6
@@ -80,12 +80,7 @@ public:
     void draw_scale_graduation(SDL_Renderer * renderer,
             plot_params *params,
             splot *plot,
-            float plot_width,
-            float plot_heigth,
-            SDL_Rect plot_mask_position,
-            SDL_Color font_color,
-            int plot_position_x,
-            int plot_position_y);
+            SDL_Color font_color);
 
     /**
      * @brief draw_points
@@ -103,7 +98,7 @@ public:
      * @param plot_mask_position
      *      SDL rectangle giving position of plot base (x,y) from max x or max y due to stroke width
      */
-    void draw_points(SDL_Renderer* renderer, Caption_item* caption_item, plot_params *params, float plot_width, float plot_heigth, SDL_Rect plot_mask_position);
+    void draw_points(SDL_Renderer* renderer, Caption_item* caption_item, plot_params *params );
 
     /**
      * @brief draw_plot
@@ -173,7 +168,7 @@ public:
 
 private:
 
-
+   
 
     splot plot;
 

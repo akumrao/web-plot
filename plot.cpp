@@ -48,22 +48,47 @@ int Plot::run(void *arg) {
 
 void Plot::mainloop(void *arg) {
     Plot *ctx = static_cast<Plot*> (arg);
-
-    static int x =0 ;
-    x = ++x%5;
-     
-       coordlist coordinate_list = NULL;
-
-       for (int i = 0; i < 9; ++i) {
-           coordinate_list = push_back_coord(coordinate_list, 0, i, 10 +x +i % 3);
-           coordinate_list = push_back_coord(coordinate_list, 1, i, 8 + i % 3);
-       }
-
-       ctx->win_params->plotparm->coordinate_list = coordinate_list;
-       ctx->win_params->plotparm->update = true;
-
+    
     ctx->draw_window(&ctx->plot, ctx->win_params);
 
+
+    static int x = 0;
+    x = ++x % 5;
+
+ 
+
+    plot_params *params = ctx->win_params->nxt->plotparm;
+    params->clean();
+    ctx->win_params->plotparm->update = true;
+    params->update = true;
+    params->push_back(0, -5, -2+x);
+    params->push_back(0, -4, -9);
+    params->push_back(0, -3, -9);
+    params->push_back(0, -2, -3);
+    params->push_back(0, -1, -8);
+    params->push_back(0, 0, 0);
+    params->push_back(0, 0, 9);
+    params->push_back(0, 1, 5);
+    params->push_back(0, 2, 12);
+    params->push_back(0, 3, 18);
+    params->push_back(0, 4, 3);
+
+
+    plot_params *params1 = ctx->win_params->nxt->nxt->plotparm;
+    params1->clean();
+    params1->update = true;
+    for (int i = 0; i < 2048; ++i) {
+
+        float sineStep = 2 * M_PI * i * 440 / 44100;
+         float ret;
+        if(x < 4)
+         ret=  x + (120 * sin(sineStep)) + 128;
+        else
+         ret=  x + (120 * cos(sineStep)) + 128;        
+        params1->push_back(0, i, ret);
+    }
+
+    
     return;
 
 
@@ -238,12 +263,13 @@ void Plot::draw_window(splot *plot, Plot_Window_params *win_params) {
                 SDL_SetRenderTarget(plot->renderer, parentTarget);
 
                 SDL_Rect drect = {col*w, row*h, w, h};
-
+                
+                win_params->plotparm->colPos= col*w;
+                win_params->plotparm->rowPos= row*h;
+        
                 myPrintf(" win=%d, col = %d, row=%d \n", count, col, row);
-
-
                 SDL_RenderCopy(plot->renderer, win_params->plotparm->texTarget, &srect, &drect);
-
+                
 
             }
 
@@ -251,13 +277,22 @@ void Plot::draw_window(splot *plot, Plot_Window_params *win_params) {
 
             row = (int) (count) / nHoriz;
             col = count % nHoriz;
+            for(auto& kv : win_params->plotparm->points)
+            {
+                if(kv.second.size())
+                {
+                    SDL_RenderDrawLines(plot->renderer, &kv.second[0], kv.second.size()); 
+                    kv.second.clear();
+                }
 
+            }
+            
             //   SDL_DestroyTexture(texTarget);
             win_params = win_params->nxt;
 
         }
 
-
+        
         SDL_RenderPresent(plot->renderer);
 
     }
@@ -283,10 +318,6 @@ void Plot::draw_plot(splot *plot, plot_params *params) {
         SDL_Color font_color = {0, 0, 0, 255};
         //---------------------------------------------
 
-        float plot_width = params->screen_width * 0.8;
-        float plot_heigth = params->screen_heigth * 0.8;
-        float plot_caption_heigth = params->screen_heigth * 0.05;
-
         SDL_Rect scree_position;
         scree_position.x = 0;
         scree_position.y = 0;
@@ -296,45 +327,25 @@ void Plot::draw_plot(splot *plot, plot_params *params) {
 
         SDL_SetRenderDrawColor(plot->renderer, 0, 255, 0, 255);
         SDL_RenderDrawRect(plot->renderer, &scree_position);
-        //SDL_RenderFillRect(plot->renderer, &scree_position);
-
-        SDL_Rect plot_position;
-        plot_position.x = (params->screen_width / 2)-(plot_width * 0.47);
-        plot_position.y = (params->screen_heigth * 0.50)-(plot_heigth / 2);
-        plot_position.w = plot_width;
-        plot_position.h = plot_heigth;
-
-        //   SDL_SetRenderDrawColor(plot->renderer, 255, 0, 0, 255);
-        // SDL_RenderDrawRect(plot->renderer,  &plot_position  );
-        //  SDL_RenderFillRect(plot->renderer, &plot_position);
 
 
+        SDL_SetRenderDrawColor(plot->renderer, 0, 255, 0, 255);
+        SDL_RenderDrawRect(plot->renderer, &scree_position);
 
-        SDL_Rect plot_caption_position;
-        plot_caption_position.x = plot_position.x;
-        plot_caption_position.y = plot_position.y - 20 - plot_caption_heigth;
-        plot_caption_position.w = plot_width;
-        plot_caption_position.h = plot_caption_heigth;
-
-      // SDL_SetRenderDrawColor(plot->renderer, 255, 255, 0, 255);
-      //  SDL_RenderDrawRect(plot->renderer, &plot_caption_position);
-      //  SDL_RenderFillRect(plot->renderer, &plot_caption_position);
+        // SDL_SetRenderDrawColor(plot->renderer, 255, 255, 0, 255);
+        //  SDL_RenderDrawRect(plot->renderer, &plot_caption_position);
+        //  SDL_RenderFillRect(plot->renderer, &plot_caption_position);
 
 
-        SDL_Rect caption_y_position;
-        caption_y_position.x = plot_position.x;
-        caption_y_position.y = plot_position.y;
+        //SDL_Rect caption_y_position;
+        //  caption_y_position.x = plot_position.x;
+        // caption_y_position.y = plot_position.y;
 
 
         draw_scale_graduation(plot->renderer,
                 params,
                 plot,
-                plot_width,
-                plot_heigth,
-                plot_position,
-                font_color,
-                plot_position.x,
-                plot_position.y);
+                font_color);
 
         if (params->caption_list != NULL) {
             Caption_item *tmp = params->caption_list;
@@ -344,8 +355,8 @@ void Plot::draw_plot(splot *plot, plot_params *params) {
 
                 while (tmp != NULL) {
                     //plot cercle1
-                    int circle_x1 = plot_caption_position.x + caption_offset;
-                    int circle_y1 = plot_caption_position.y + plot_caption_heigth / 2 + stroke_width;
+                    int circle_x1 = params->plot_caption_position.x + caption_offset;
+                    int circle_y1 = params->plot_caption_position.y + params->plot_caption_position.h / 2 + stroke_width;
 
                     SDL_SetRenderDrawColor(plot->renderer, 0, 0, 0, 255);
                     fill_circle(plot->renderer, circle_x1, circle_y1, DOT_RADIUS);
@@ -359,7 +370,7 @@ void Plot::draw_plot(splot *plot, plot_params *params) {
                     //plot cercle2
                     caption_offset += 40;
 
-                    int circle_x2 = plot_caption_position.x + caption_offset;
+                    int circle_x2 = params->plot_caption_position.x + caption_offset;
                     int circle_y2 = circle_y1;
 
                     SDL_SetRenderDrawColor(plot->renderer, 0, 0, 0, 255);
@@ -393,10 +404,7 @@ void Plot::draw_plot(splot *plot, plot_params *params) {
 
                     draw_points(plot->renderer,
                             tmp,
-                            params,
-                            plot_width,
-                            plot_heigth,
-                            plot_position);
+                            params);
 
                     tmp = tmp->nxt;
                 }
@@ -424,37 +432,37 @@ void Plot::draw_plot(splot *plot, plot_params *params) {
  *      caption item object structure
  * @param params
  *      plot parameters (cf plot_params struct)
- * @param plot_width
+ * @param  params->plot_position.w
  *      plot base width (with proportion to screen width)
- * @param plot_heigth
+ * @param  params->plot_position.h
  *      plot bas heigth (with proportion to screen heigth)
- * @param plot_mask_position
+ * @param params->plot_position
  *      SDL rectangle giving position of plot base (x,y) from max x or max y due to stroke width
  */
 void Plot::draw_points(
         SDL_Renderer* renderer,
         Caption_item* caption_item,
-        plot_params *params,
-        float plot_width,
-        float plot_heigth,
-        SDL_Rect plot_mask_position) {
+        plot_params *params) {
     Coordinate_item* tmp = params->coordinate_list;
 
-    // float scale_x_num = plot_width / (params->max.x / params->scale.x);
-    // float scale_y_num = plot_heigth / (params->max.y / params->scale.y);
-    float scale_x_num = plot_width / ((params->max.x - params->min.x) / params->scale.x);
-    float scale_y_num = plot_heigth / ((params->max.y - params->min.y) / params->scale.y);
+    // float scale_x_num =  params->plot_position.w / (params->max.x / params->scale.x);
+    // float scale_y_num =  params->plot_position.h / (params->max.y / params->scale.y);
+    float scale_x_num = params->plot_position.w / ((params->max.x - params->min.x) / params->scale.x);
+    float scale_y_num = params->plot_position.h / ((params->max.y - params->min.y) / params->scale.y);
 
     unsigned char isFirst = 1;
 
     float previous_x = 0;
     float previous_y = 0;
 
+
+      
     while (tmp != NULL) {
         if (tmp->caption_id == caption_item->caption_id) {
-            float circle_x1 = plot_mask_position.x  + ((tmp->x - params->min.x) / params->scale.x) * scale_x_num;
-            float circle_y1 = plot_mask_position.y + plot_heigth - ((tmp->y - params->min.y) / params->scale.y) * scale_y_num;
+            float circle_x1 = params->plot_position.x + ((tmp->x - params->min.x) / params->scale.x) * scale_x_num;
+            float circle_y1 = params->plot_position.y + params->plot_position.h - ((tmp->y - params->min.y) / params->scale.y) * scale_y_num;
 
+        //    myPrintf("(%f , %f)",circle_x1, circle_y1 );
             SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 
             if (params->dot)
@@ -471,6 +479,7 @@ void Plot::draw_points(
                 SDL_RenderDrawLine(renderer, previous_x, previous_y, circle_x1, circle_y1);
             }
 
+            
             previous_x = circle_x1;
             previous_y = circle_y1;
 
@@ -480,6 +489,8 @@ void Plot::draw_points(
         }
         tmp = tmp->nxt;
     }
+    
+
 }
 
 /**
@@ -491,11 +502,11 @@ void Plot::draw_points(
  *      plot parameters (cf plot_params struct)
  * @param plot
  *      structure containing textures and surfaces
- * @param plot_width
+ * @param  params->plot_position.w
  *      plot base width (with proportion to screen width)
- * @param plot_heigth
+ * @param  params->plot_position.h
  *      plot bas heigth (with proportion to screen heigth)
- * @param plot_mask_position
+ * @param params->plot_position
  *      SDL rectangle giving position of plot base (x,y) from max x or max y due to stroke width
  * @param font
  *      SDL font used for captions
@@ -505,24 +516,19 @@ void Plot::draw_points(
  *      list of surfaces stored to be freed later
  * @param plot_position_x
  *      x position of plot
- * @param plot_position_y
+ * @param  params->plot_position.y
  *      y position of plot
  */
 void Plot::draw_scale_graduation(SDL_Renderer * renderer,
         plot_params *params,
         splot *plot,
-        float plot_width,
-        float plot_heigth,
-        SDL_Rect plot_mask_position,
-        SDL_Color font_color,
-        int plot_position_x,
-        int plot_position_y) {
+        SDL_Color font_color) {
 
-    double scale_x_num = plot_width / ((params->max.x - params->min.x) / params->scale.x);
-    double scale_y_num = plot_heigth / ((params->max.y - params->min.y) / params->scale.y);
+    double scale_x_num = params->plot_position.w / ((params->max.x - params->min.x) / params->scale.x);
+    double scale_y_num = params->plot_position.h / ((params->max.y - params->min.y) / params->scale.y);
 
-    double init_pos_x = plot_mask_position.x;
-    double init_pos_y = plot_mask_position.y + plot_heigth;
+    double init_pos_x = params->plot_position.x;
+    double init_pos_y = params->plot_position.y + params->plot_position.h;
 
     double current_scale = params->min.x;
 
@@ -532,17 +538,17 @@ void Plot::draw_scale_graduation(SDL_Renderer * renderer,
     //int i = 0;
 
     double regular_caption_text_heigth = 0;
-    double regular_caption_text_width = 0;
+    //double regular_caption_text_width = 0;
 
     for (int i = min_point_number_x; i < max_point_number_x + 1; i++) {
 
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         if (params->grid) {
-            SDL_RenderDrawLine(renderer, init_pos_x, init_pos_y, init_pos_x, init_pos_y - plot_heigth);
+            SDL_RenderDrawLine(renderer, init_pos_x, init_pos_y, init_pos_x, init_pos_y - params->plot_position.h);
         } else {
             SDL_RenderDrawLine(renderer, init_pos_x, init_pos_y, init_pos_x, init_pos_y - GRADUATION_HEIGTH);
             if (!i && min_point_number_x < 0)
-                SDL_RenderDrawLine(renderer, init_pos_x, init_pos_y, init_pos_x, init_pos_y - plot_heigth);
+                SDL_RenderDrawLine(renderer, init_pos_x, init_pos_y, init_pos_x, init_pos_y - params->plot_position.h);
         }
 
         char text[10];
@@ -573,18 +579,18 @@ void Plot::draw_scale_graduation(SDL_Renderer * renderer,
     double max_point_number_y = (params->max.y / params->scale.y);
     double min_point_number_y = (params->min.y / params->scale.y);
 
-    init_pos_x = plot_mask_position.x;
-    init_pos_y = plot_mask_position.y + plot_heigth;
+    init_pos_x = params->plot_position.x;
+    init_pos_y = params->plot_position.y + params->plot_position.h;
 
     for (int i = min_point_number_y; i < max_point_number_y + 1; i++) {
 
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         if (params->grid) {
-            SDL_RenderDrawLine(renderer, init_pos_x, init_pos_y, init_pos_x + plot_width, init_pos_y);
+            SDL_RenderDrawLine(renderer, init_pos_x, init_pos_y, init_pos_x + params->plot_position.w, init_pos_y);
         } else {
             SDL_RenderDrawLine(renderer, init_pos_x, init_pos_y, init_pos_x + GRADUATION_HEIGTH, init_pos_y);
             if (!i && min_point_number_y < 0)
-                SDL_RenderDrawLine(renderer, init_pos_x, init_pos_y, init_pos_x + plot_width, init_pos_y);
+                SDL_RenderDrawLine(renderer, init_pos_x, init_pos_y, init_pos_x + params->plot_position.w, init_pos_y);
         }
 
         char text[10];
@@ -610,15 +616,15 @@ void Plot::draw_scale_graduation(SDL_Renderer * renderer,
 
         current_scale += params->scale.y;
 
-        regular_caption_text_width = FONT_CHARACTER_SIZE + 2;
+//        regular_caption_text_width = FONT_CHARACTER_SIZE + 2;
     }
 
     //caption y
     SDL_Rect text_caption_y;
     text_caption_y.w = FONT_CHARACTER_SIZE * strlen(params->caption_text_y);
     text_caption_y.h = FONT_CHARACTER_SIZE + 2;
-    text_caption_y.x = regular_caption_text_width - 10;
-    text_caption_y.y = plot_mask_position.y + plot_heigth / 2 + text_caption_y.w / 4;
+    text_caption_y.x =  params->plot_position.x/2 - FONT_CHARACTER_SIZE -2;
+    text_caption_y.y = params->plot_position.y + params->plot_position.h / 2 + text_caption_y.w / 4;
 
     SDL_DrawString_Flip(renderer, text_caption_y.x, text_caption_y.y, params->caption_text_y, 8, &font_color);
 
@@ -629,7 +635,7 @@ void Plot::draw_scale_graduation(SDL_Renderer * renderer,
     text_caption_x.w = FONT_CHARACTER_SIZE * strlen(params->caption_text_x);
     text_caption_x.h = FONT_CHARACTER_SIZE + 2;
     text_caption_x.x = params->screen_width / 2 - text_caption_x.w / 2;
-    text_caption_x.y = plot_position_y + plot_heigth + 5 + 1 * regular_caption_text_heigth;
+    text_caption_x.y = params->plot_position.y + params->plot_position.h + 5 + 1 * regular_caption_text_heigth;
     //SDL_RenderCopy(plot->renderer, plot->textureX, NULL, &text_caption_x);
     SDL_DrawString(renderer, text_caption_x.x, text_caption_x.y, params->caption_text_x, 8, &font_color);
 
@@ -658,7 +664,7 @@ void Plot::wait_for_sdl_event() {
                 break;
             default:
             {
-                myPrintf(" Polling for events\n");
+               // myPrintf(" Polling for events\n");
 
                 mainloop(this);
                 SDL_Delay(50);

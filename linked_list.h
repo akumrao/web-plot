@@ -16,6 +16,11 @@
 #include "SDL2/SDL.h"
 #endif
 
+#include "dump.h"
+
+#include<map>
+#include<vector>
+
 //--------------CAPTION STRUCT --------------
 typedef struct Caption_item Caption_item;
 
@@ -130,7 +135,51 @@ typedef struct Plot_params_struct {
     bool dot;
     bool grid;
     bool update;
-    Plot_params_struct(const char * caption_x, const char * caption_y, captionlist caption_lst, coordlist coordinate_lst) : update(true),texTarget(NULL) {
+    SDL_Rect plot_caption_position;
+    SDL_Rect plot_position;
+    std::map< int, std::vector< SDL_Point > > points;
+    
+    float scale_x_num ;
+    float scale_y_num ;
+    
+    int colPos;
+    int rowPos;
+    
+     void clean()
+    {
+        
+         for(auto& kv : points)
+         {
+             
+            kv.second.clear();
+          
+         }
+    }
+    
+     
+    void pop( int id)
+    {
+       if (!points[id].empty())
+        points[id].erase(points[id].begin());
+     }
+         
+    void push_back( int id, int x, int y)
+    {
+       
+        if(!scale_x_num)
+        scale_x_num = plot_position.w / ((max.x - min.x) / scale.x);
+        if(!scale_y_num)
+        scale_y_num = plot_position.h / ((max.y - min.y) / scale.y);
+        
+        int _x1 = colPos +plot_position.x + ((x - min.x) / scale.x) * scale_x_num;
+        int _y1 = rowPos +plot_position.y + plot_position.h - ((y - min.y) / scale.y) * scale_y_num;
+
+       // myPrintf("(%d , %d)", _x1 , _y1 );
+        
+        points[id].push_back( { _x1 , _y1 } );
+    }
+
+    Plot_params_struct(const char * caption_x, const char * caption_y, captionlist caption_lst, coordlist coordinate_lst) : update(true),texTarget(NULL),scale_x_num(0), scale_y_num(0), colPos(0),rowPos(0) {
         screen_width = 400;
         screen_heigth = 400;
         dot = true;
@@ -143,7 +192,59 @@ typedef struct Plot_params_struct {
         coordinate_list = coordinate_lst;
         max = coordinate_lst->max();
         min = coordinate_lst->min();
+       
+        float plot_width = screen_width * 0.8;
+        float plot_heigth = screen_heigth * 0.8;
+        float plot_caption_heigth = screen_heigth * 0.05;
+ 
+   
+        plot_position.x = (screen_width / 2)-(plot_width * 0.47);
+        plot_position.y = (screen_heigth * 0.50)-(plot_heigth / 2);
+        plot_position.w = plot_width;
+        plot_position.h = plot_heigth;
+       
+        plot_caption_position.x = plot_position.x;
+        plot_caption_position.y = plot_position.y - 20 - plot_caption_heigth;
+        plot_caption_position.w = plot_width;
+        plot_caption_position.h = plot_caption_heigth;
+      
+
     }
+    Plot_params_struct(const char * caption_x, const char * caption_y, int w, int h, captionlist caption_lst, coordlist coordinate_lst) : update(true),texTarget(NULL),scale_x_num(0), scale_y_num(0), colPos(0),rowPos(0) {
+        screen_width = w;
+        screen_heigth = h;
+        dot = false;
+        grid= true;
+        scale.x = 1;
+        scale.y = 1;
+        caption_text_x = caption_x;
+        caption_text_y = caption_y;
+        caption_list = caption_lst;
+        coordinate_list = coordinate_lst;
+        if(coordinate_lst)
+        {
+        max = coordinate_lst->max();
+        min = coordinate_lst->min();
+        }
+       
+        float plot_width = screen_width * 0.8;
+        float plot_heigth = screen_heigth * 0.8;
+        float plot_caption_heigth = screen_heigth * 0.05;
+ 
+   
+        plot_position.x = (screen_width / 2)-(plot_width * 0.47);
+        plot_position.y = (screen_heigth * 0.50)-(plot_heigth / 2);
+        plot_position.w = plot_width;
+        plot_position.h = plot_heigth;
+       
+        plot_caption_position.x = plot_position.x;
+        plot_caption_position.y = plot_position.y - 20 - plot_caption_heigth;
+        plot_caption_position.w = plot_width;
+        plot_caption_position.h = plot_caption_heigth;
+      
+
+    }
+    
 } plot_params;
 
 
@@ -256,5 +357,7 @@ captionlist clear_caption(captionlist list);
 plotwinlist push_back_plot_win(plotwinlist list, plot_params* plotparm);
 
 plotwinlist clear_plot_win(plotwinlist list);
+
+
 
 #endif
