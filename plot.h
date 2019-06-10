@@ -13,8 +13,14 @@
 #else
 #include "SDL2/SDL.h"
 #endif
-//#include <list>
-#include "linked_list.h"
+
+#include "SDL_font.h"
+
+//////////////////////////////////////////////////////////////////////////////////
+
+
+////////////////////////////////////////////////////////////////////////////////////
+
 /// text inside box( for eg. load and download)
 #define DOT_RADIUS                    6
 #define CAPTION_OFFSET_CIRCLE_TO_TEXT 10

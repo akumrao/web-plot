@@ -10,7 +10,6 @@
 
 #include <SDL2/SDL.h>
 #include "SDL_font.h"
-#include "font_basic.h"
 /* ---- 8x8 font definition ---- */
 
 /* Originally part of SDL2_gfx */
@@ -232,7 +231,46 @@ int SDL_DrawCharacter(SDL_Renderer *renderer, int x, int y, char c, int size, bo
         SDL_FreeSurface(character);
 
         /*
-         * Check pointer
+         * Check pointer#include "dump.h" 
+
+
+
+FILE *fpDump = NULL;
+
+
+void myPrintf(const char *fmt, ...)
+{
+    va_list parms;
+    char buf[256];
+
+    // Try to print in the allocated space.
+    va_start(parms, fmt);
+    vsprintf(buf, fmt, parms);
+    va_end(parms);
+
+    // Write the information out to a txt file
+    if(fpDump)
+    {    
+      fprintf(fpDump, "%s", buf);
+      fflush( fpDump);
+    }
+    printf("%s", buf);
+   
+}// End myPrintf(..)
+
+
+
+
+int log_set_file(const char* filename)
+{
+        FILE* fp = fopen(filename, "w");
+        if (fp == NULL) return -1;
+        fpDump = fp;
+        return 0;
+}
+
+
+   
          */
         if (SDL_CharTextureCache[(size/8) -1 + flip*2][ci] == NULL) {
             return (-1);
@@ -347,3 +385,267 @@ void SDL_CleanupTextDrawing(void) {
     }
 
 /* vi: set ts=4 sw=4 expandtab: */
+
+
+//dump.cpp
+////////////////////////////////////////////////////////////////////////////////////////////////
+
+FILE *fpDump = NULL;
+
+
+void myPrintf(const char *fmt, ...)
+{
+    va_list parms;
+    char buf[256];
+
+    // Try to print in the allocated space.
+    va_start(parms, fmt);
+    vsprintf(buf, fmt, parms);
+    va_end(parms);
+
+    // Write the information out to a txt file
+    if(fpDump)
+    {    
+      fprintf(fpDump, "%s", buf);
+      fflush( fpDump);
+    }
+    printf("%s", buf);
+   
+}// End myPrintf(..)
+
+
+
+
+int log_set_file(const char* filename)
+{
+        FILE* fp = fopen(filename, "w");
+        if (fp == NULL) return -1;
+        fpDump = fp;
+        return 0;
+}
+
+
+//linked_list.cpp
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/**
+        linked_list.c
+
+        Build custom linked list, push new element, clear and print items
+
+        @author Arvid Umrao <akumrao@yahoo.com> <arvind.umrao@harman.com>
+        @version 0.1
+
+/**
+ * @brief clear_caption
+ *      clear caption table
+ * @param list
+ *      list of caption items
+ */
+captionlist clear_caption(captionlist list) {
+
+    if (list != NULL) {
+        Caption_item * current = list;
+        Caption_item * next;
+
+        while (current != NULL) {
+            next = current->nxt;
+            free(current);
+            current = next;
+        }
+
+        list = NULL;
+    }
+    return list;
+}
+
+/**
+ * @brief push_back_caption
+ *      push a new item to the end of caption table
+ * @param list
+ *      list of caption items
+ * @param caption_txt
+ *      caption text
+ * @param color
+ *      caption color
+ */
+captionlist push_back_caption(captionlist liste, const char * valeur, int caption_id, int color) {
+    Caption_item* caption_new_item = (Caption_item*) malloc(sizeof (Caption_item));
+    caption_new_item->caption_txt = valeur;
+    caption_new_item->caption_id = caption_id;
+    caption_new_item->caption_color = color;
+
+    caption_new_item->nxt = NULL;
+
+    if (liste == NULL) {
+        return caption_new_item;
+    } else {
+        Caption_item* temp = liste;
+        while (temp->nxt != NULL) {
+            temp = temp->nxt;
+        }
+        temp->nxt = caption_new_item;
+        return liste;
+    }
+}
+
+/**
+ * @brief print_list_caption
+ *      print caption table
+ * @param list
+ *      list of caption items
+ */
+void print_list_caption(captionlist list) {
+
+    Caption_item *tmp = list;
+
+    if (tmp != NULL) {
+        while (tmp != NULL) {
+            printf("%s => %d;", tmp->caption_txt, tmp->caption_id);
+            tmp = tmp->nxt;
+        }
+        printf("\n");
+    }
+
+}
+
+/**
+ * @brief clear_coord
+ *      clear coordinate table
+ * @param list
+ *      list of coordinate items
+ */
+coordlist clear_coord(coordlist list) {
+
+    if (list != NULL) {
+        Coordinate_item * current = list;
+        Coordinate_item * next;
+
+        while (current != NULL) {
+            next = current->nxt;
+            free(current);
+            current = next;
+        }
+
+        list = NULL;
+    }
+    return list;
+}
+
+/**
+ * @brief push_back_coord
+ *      push a new item to the end of coordinate table
+ * @param list
+ *      list of coordinate items
+ * @param caption_id
+ *      caption identifier
+ * @param x
+ *      x coordinate
+ * @param y
+ *      y coordinate
+ */
+coordlist push_back_coord(coordlist list, int caption_id, float x, float y) {
+    Coordinate_item* coord_new_item = (Coordinate_item*) malloc(sizeof (Coordinate_item));
+    coord_new_item->x = x;
+    coord_new_item->y = y;
+    coord_new_item->caption_id = caption_id;
+    coord_new_item->nxt = NULL;
+
+    if (list == NULL) {
+        return coord_new_item;
+    } else {
+        Coordinate_item* temp = list;
+        while (temp->nxt != NULL) {
+            temp = temp->nxt;
+        }
+        temp->nxt = coord_new_item;
+        return list;
+    }
+}
+
+coordlist push_back_coords(coordlist list, int caption_id, float *points, int size) {
+
+    for (int i = 0; i < size; ++i) {
+
+        list = push_back_coord(list, caption_id, i, points[i]);
+
+    }
+    
+    return list;
+}
+
+
+/**
+ * @brief print_list_coord
+ *      print coordinate table
+ * @param list
+ *      list of coordinate items
+ */
+void print_list_coord(coordlist list) {
+
+    Coordinate_item *tmp = list;
+
+    if (tmp != NULL) {
+        while (tmp != NULL) {
+            printf("(%f,%f) ", tmp->x, tmp->y);
+            tmp = tmp->nxt;
+        }
+        printf("\n");
+    }
+
+}
+
+
+
+
+
+/**
+ * @brief clear_surface
+ *      clear surface table
+ * @param list
+ *      list of surface items
+ */
+plotwinlist clear_plot_win(plotwinlist list) {
+
+    if (list != NULL) {
+        Plot_Window_params * current = list;
+        Plot_Window_params * next;
+
+        while (current != NULL) {
+            next = current->nxt;
+            //SDL_FreeSurface(current->surface);
+            free(current);
+            current = next;
+        }
+
+        list = NULL;
+    }
+    return list;
+}
+
+/**
+ * @brief push_back_surface
+ *      push a new item to the end of surface table
+ * @param list
+ *      list of surface items
+ * @param surface
+ *      SDL surface ptr
+ */
+plotwinlist push_back_plot_win(plotwinlist list, plot_params* plotparm) {
+    Plot_Window_params* plot_win_new_item = (Plot_Window_params*) malloc(sizeof (Plot_Window_params));
+    plot_win_new_item->plotparm = plotparm;
+
+    plot_win_new_item->nxt = NULL;
+
+    if (list == NULL) {
+        return plot_win_new_item;
+    } else {
+        Plot_Window_params* temp = list;
+        while (temp->nxt != NULL) {
+            temp = temp->nxt;
+        }
+        temp->nxt = plot_win_new_item;
+        return list;
+    }
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////
