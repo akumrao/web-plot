@@ -9,6 +9,8 @@
 #include "stdio.h"
 #include "plot.h"
 
+#define         PI                      3.14159265358979
+
 int main(int argc, char* argv[]) {
 
     printf("usage: %s number of graph \n", argv[0]);
