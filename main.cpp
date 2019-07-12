@@ -17,6 +17,51 @@ int main(int argc, char* argv[]) {
 
     plotwinlist plotwin_list = NULL;
 
+      {
+        //populate caption list
+        captionlist caption_list = NULL;
+
+        caption_list = push_back_caption(caption_list, "Sine", 0, 0x0000FF);
+
+        coordlist coordinate_list = NULL;
+
+        for (int i = 0; i < 2048; ++i) {
+
+            // float sineStep = 2 * M_PI * i * 440 / 44100;
+            //float ret =  sin(sineStep);
+            float ret = 0.5 * (1 - cos(2.0 * PI * (i - 0.5) / 2048));
+            coordinate_list = push_back_coord(coordinate_list, 0, i, ret);
+        }
+
+
+        //print_list_coord(coordinate_list);
+
+        //populate plot parameter object
+        plot_params *params = new plot_params("x", "Y", caption_list, coordinate_list, 800, 400);
+
+
+        //  Plot_Window_params win_param;
+        plotwin_list = push_back_plot_win(plotwin_list, params);
+
+        // For running graph example
+        
+        params->dot = true;
+        params->update = true;
+        params->max.x = 2048;
+        params->max.y = 1;
+        params->min.x = 0;
+        params->min.y = 0;
+
+        
+        for (int i = 0; i < 2048; ++i) {
+
+            // float sineStep = 2 * M_PI * i * 440 / 44100;
+            //float ret =  sin(sineStep);
+            float ret = 0.5 * (1 - cos(2.0 * PI * (i - 0.5) / 2048));
+            params->push_back(0, i, ret);
+        }
+
+    }
 
     {
         //populate caption list
@@ -57,13 +102,11 @@ int main(int argc, char* argv[]) {
         //print_list_coord(coordinate_list);
 
         //populate plot parameter object
-        plot_params *params = new plot_params("Time (s)", "Speed (Mbit/s)", caption_list, coordinate_list);
+        plot_params *params = new plot_params("Time (s)", "Speed (Mbit/s)", caption_list, coordinate_list,800, 400);
 
         // params->screen_width = 500;
         // params->screen_heigth = 500;
 
-        params->scale.x = 1;
-        params->scale.y = 10;
         params->max.x = 10;
         params->max.y = 100;
 
@@ -103,8 +146,6 @@ int main(int argc, char* argv[]) {
 
          
 
-        params->scale.x = 1;
-        params->scale.y = 2;
         params->max.x = +5;
         params->max.y = 20;
         params->min.x = -5;
@@ -115,39 +156,8 @@ int main(int argc, char* argv[]) {
 
     }
 
-    
-     {
-         //populate caption list
-         captionlist caption_list = NULL;
 
-         caption_list = push_back_caption(caption_list, "Sine", 0, 0x0000FF);
 
-         coordlist coordinate_list = NULL;
-
-         for (int i = 0; i < 2048; ++i) {
-             
-            // float sineStep = 2 * M_PI * i * 440 / 44100;
-             //float ret =  sin(sineStep);
-            float ret =     0.5 * (1 - cos(2.0 * PI * (i - 0.5) / 2048));
-             coordinate_list = push_back_coord(coordinate_list, 0, i, ret);
-         }
-      
-
-         //print_list_coord(coordinate_list);
-
-         //populate plot parameter object
-         plot_params *params = new plot_params("x", "Y",  caption_list, coordinate_list,800, 400);
-        params->dot =true;
-        /*params->scale.x = 128;
-        params->scale.y = 32;
-        params->max.x = 2048;
-        params->max.y = 256;
-        params->min.x = 0;
-        params->min.y = 0;*/
-         //  Plot_Window_params win_param;
-         plotwin_list = push_back_plot_win(plotwin_list, params);
-
-     }
 
     Plot plot;
 

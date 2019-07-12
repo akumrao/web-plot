@@ -563,7 +563,6 @@ coordlist push_back_coord(coordlist list, int caption_id, float x, float y) {
 }
 
 
-
 /**
  * @brief print_list_coord
  *      print coordinate table

@@ -16,6 +16,8 @@
 
 #include "SDL_font.h"
 
+#include <functional>
+
 //////////////////////////////////////////////////////////////////////////////////
 
 
@@ -55,7 +57,9 @@ public:
 
     static void mainloop(void *arg);
 
-     static int run(void *arg);
+    static int run(void *arg);
+
+    std::function<void(void)> f_callback;
 
     /**
      * @brief draw_scale_graduation
