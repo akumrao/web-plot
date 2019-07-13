@@ -15,9 +15,9 @@ int main(int argc, char* argv[]) {
 
     printf("usage: %s number of graph \n", argv[0]);
 
-    plotwinlist plotwin_list = NULL;
 
-      {
+
+    {
         //populate caption list
         captionlist caption_list = NULL;
 
@@ -25,7 +25,7 @@ int main(int argc, char* argv[]) {
 
         coordlist coordinate_list = NULL;
 
-        for (int i = 0; i < 2048; ++i) {
+        for (int i = 0; i <= 2048; ++i) {
 
             // float sineStep = 2 * M_PI * i * 440 / 44100;
             //float ret =  sin(sineStep);
@@ -41,10 +41,10 @@ int main(int argc, char* argv[]) {
 
 
         //  Plot_Window_params win_param;
-        plotwin_list = push_back_plot_win(plotwin_list, params);
+        push_back_plot_win(params);
 
         // For running graph example
-        
+
         params->dot = true;
         params->update = true;
         params->max.x = 2048;
@@ -52,7 +52,7 @@ int main(int argc, char* argv[]) {
         params->min.x = 0;
         params->min.y = 0;
 
-        
+
         for (int i = 0; i < 2048; ++i) {
 
             // float sineStep = 2 * M_PI * i * 440 / 44100;
@@ -62,7 +62,41 @@ int main(int argc, char* argv[]) {
         }
 
     }
+    {
+        //populate caption list
+        captionlist caption_list = NULL;
 
+        caption_list = push_back_caption(caption_list, "Test", 0, 0x0000FF);
+ 
+        //print_list_caption(caption_list);
+
+        //populate coordinate list
+        coordlist coordinate_list = NULL;
+
+        coordinate_list = push_back_coord(coordinate_list, 0, 0, 0);
+        coordinate_list = push_back_coord(coordinate_list, 0, 1, 90);
+        coordinate_list = push_back_coord(coordinate_list, 0, 2, 84);
+        coordinate_list = push_back_coord(coordinate_list, 0, 3, 98);
+        coordinate_list = push_back_coord(coordinate_list, 0, 4, 94);
+        coordinate_list = push_back_coord(coordinate_list, 0, 5, 85);
+        coordinate_list = push_back_coord(coordinate_list, 0, 6, 90);
+        coordinate_list = push_back_coord(coordinate_list, 0, 7, 99);
+        coordinate_list = push_back_coord(coordinate_list, 0, 16, 94);
+        coordinate_list = push_back_coord(coordinate_list, 0, 17, 80);
+
+
+        //print_list_coord(coordinate_list);
+
+        //populate plot parameter object
+        plot_params *params = new plot_params("Time (s)", "Speed (Mbit/s)", caption_list, coordinate_list, 800, 400);
+
+
+
+
+        //  Plot_Window_params win_param;
+        push_back_plot_win(params);
+
+    }
     {
         //populate caption list
         captionlist caption_list = NULL;
@@ -102,21 +136,15 @@ int main(int argc, char* argv[]) {
         //print_list_coord(coordinate_list);
 
         //populate plot parameter object
-        plot_params *params = new plot_params("Time (s)", "Speed (Mbit/s)", caption_list, coordinate_list,800, 400);
-
-        // params->screen_width = 500;
-        // params->screen_heigth = 500;
-
-        params->max.x = 10;
-        params->max.y = 100;
+        plot_params *params = new plot_params("Time (s)", "Speed (Mbit/s)", caption_list, coordinate_list, 800, 400);
 
 
 
         //  Plot_Window_params win_param;
-        plotwin_list = push_back_plot_win(plotwin_list, params);
+        push_back_plot_win(params);
 
-    }   
-   {
+    }
+    {
         //populate caption list
         captionlist caption_list = NULL;
 
@@ -142,17 +170,17 @@ int main(int argc, char* argv[]) {
 
 
         //populate plot parameter object
-        plot_params *params = new plot_params("Time (s)", "Speed (Mbit/s)", caption_list, coordinate_list);
+        plot_params *params = new plot_params("Time (s)", "Speed (Mbit/s)", caption_list, coordinate_list,800,400);
 
-         
 
+/*
         params->max.x = +5;
         params->max.y = 20;
         params->min.x = -5;
         params->min.y = -10;
-
+*/
         //  Plot_Window_params win_param;
-        plotwin_list = push_back_plot_win(plotwin_list, params);
+        push_back_plot_win(params);
 
     }
 
@@ -162,7 +190,7 @@ int main(int argc, char* argv[]) {
     Plot plot;
 
 
-    int ret = plot.plot_graph(plotwin_list, "Plot");
+    int ret = plot.plot_graph("Plot");
 
     if (ret == EXIT_FAILURE) {
         printf("plot_graph return with status %d\n", ret);

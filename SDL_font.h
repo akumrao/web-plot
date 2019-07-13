@@ -226,9 +226,11 @@ typedef struct Plot_params_struct {
     SDL_Rect plot_position;
     std::map< int, std::vector< SDL_Point > > points;
     
-    float horzCell ;
-    float vertCell ;
+    int horzCell ;
+    int vertCell ;
     
+    int Y_FP;
+    int X_FP;
     int colPos;
     int rowPos;
     
@@ -259,6 +261,17 @@ typedef struct Plot_params_struct {
           
          }
         
+    }
+    void push_back( int id,  double *points, int size)
+    {
+         
+         for(int i=0; i < size ; ++i)
+         {
+         
+           push_back( id, i, points[i]);
+          
+         }
+        
     }   
     void push_back( int id, float x, float y)
     {
@@ -280,9 +293,7 @@ typedef struct Plot_params_struct {
 
         dot = true;
         grid= true;
-        
-      
-
+ 
         caption_text_x = caption_x;
         caption_text_y = caption_y;
         caption_list = caption_lst;
@@ -291,28 +302,59 @@ typedef struct Plot_params_struct {
         horzCell= 8 ;
         vertCell= 8 ;
         
+        Y_FP = 0;
+        X_FP = 0;
+        
         if(coordinate_lst && max.x ==0)
         {
             max = coordinate_lst->max();
             min = coordinate_lst->min();
             
          }
-        /*
-        if( max.x - min.x)
+        
+        if( max.x - min.x > 8)
         {
-            for( int x = 0; x < 4 ; ++x)
+            int x;
+            for( x = 0; x < 4 ; ++x)
             {
-                if( ( max.x - min.x) % vertCell == 0 )
+                if( int( max.x - min.x) % vertCell == 0 )
                     break;
                  
                 ++vertCell;
             }
+            if( x == 4)
+                X_FP = 1;
+   
+        }else
+        {
+            X_FP = 2;
+        }
+        
+        if( max.y - min.y > 8)
+        {
+             int x;
+            for( x = 0; x < 4 ; ++x)
+            {
+                if( int( max.y - min.y) % horzCell == 0 )
+                    break;
+                 
+                ++horzCell;
+            }
+            if( x == 4)
+                Y_FP = 1;
    
         }
-        */
-        float plot_width = screen_width * 0.8;
-        float plot_heigth = screen_heigth * 0.8;
-        float plot_caption_heigth = screen_heigth * 0.05;
+        else
+        {
+            Y_FP = 2;
+        }
+        
+        
+        
+        
+        double plot_width = screen_width * 0.8;
+        double plot_heigth = screen_heigth * 0.8;
+        double plot_caption_heigth = screen_heigth * 0.05;
  
    
         plot_position.x = (screen_width / 2)-(plot_width * 0.47);
@@ -466,7 +508,7 @@ captionlist clear_caption(captionlist list);
 
 
 
-plotwinlist push_back_plot_win(plotwinlist list, plot_params* plotparm);
+void push_back_plot_win( plot_params* plotparm);
 
 plotwinlist clear_plot_win(plotwinlist list);
 

@@ -53,7 +53,7 @@ public:
 
     Plot();
 
-    int plot_graph(Plot_Window_params *params, const char *title);
+    int plot_graph( const char *title);
 
     static void mainloop(void *arg);
 
