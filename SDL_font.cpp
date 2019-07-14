@@ -11,6 +11,7 @@
 #include <SDL2/SDL.h>
 #include "SDL_font.h"
 
+
  plotwinlist plotwin_list = NULL;
 /* ---- 8x8 font definition ---- */
 
@@ -625,15 +626,38 @@ void push_back_plot_win( plot_params* plotparm) {
     Plot_Window_params* plot_win_new_item = (Plot_Window_params*) malloc(sizeof (Plot_Window_params));
     plot_win_new_item->plotparm = plotparm;
 
+  
     plot_win_new_item->nxt = NULL;
 
     if (plotwin_list == NULL) {
         plotwin_list =  plot_win_new_item;
     } else {
         Plot_Window_params* temp = plotwin_list;
+        int highest_heigth = 0;
+        
         while (temp->nxt != NULL) {
+           
+            if( highest_heigth < temp->plotparm->screen_heigth)
+                highest_heigth = temp->plotparm->screen_heigth;
             temp = temp->nxt;
         }
+        
+        if( temp->plotparm->colPos  + plot_win_new_item->plotparm->screen_width <  MaxScreenX)
+        {
+            plot_win_new_item->plotparm->colPos   = temp->plotparm->colPos   + temp->plotparm->screen_width;
+            plot_win_new_item->plotparm->rowPos = temp->plotparm->rowPos  ;
+        }
+        else if( temp->plotparm->rowPos  + plot_win_new_item->plotparm->screen_heigth < MaxScreenY)
+        {
+            plot_win_new_item->plotparm->colPos = 0;
+            plot_win_new_item->plotparm->rowPos  = temp->plotparm->rowPos + highest_heigth;
+        }
+        else
+        {
+            printf( " Could not add more plot window \n ");
+            exit(0);
+        }
+            
         temp->nxt = plot_win_new_item;
 
     }

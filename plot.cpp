@@ -182,8 +182,8 @@ int Plot::plot_graph( const char *title) {
             title,
             SDL_WINDOWPOS_UNDEFINED,
             SDL_WINDOWPOS_UNDEFINED,
-            params->screen_width* nHoriz,
-            params->screen_heigth*nVert,
+            MaxScreenX,
+            MaxScreenY,
             SDL_WINDOW_SHOWN);
 
     //SDL_SetWindowFullscreen(plot.screen,SDL_WINDOW_FULLSCREEN);
@@ -238,8 +238,8 @@ void Plot::draw_window(splot *plot, Plot_Window_params *win_params) {
         int w;
         int h;
 
-        int row = 0;
-        int col = 0;
+       // int row = 0;
+       // int col = 0;
         int count = 0;
         while (win_params) {
 
@@ -271,12 +271,13 @@ void Plot::draw_window(splot *plot, Plot_Window_params *win_params) {
                 //Now render the texture target to our screen, but upside down
                 SDL_SetRenderTarget(plot->renderer, parentTarget);
 
-                SDL_Rect drect = {col*w, row*h, w, h};
+                SDL_Rect drect = {win_params->plotparm->colPos, win_params->plotparm->rowPos, w, h};
                 
-                win_params->plotparm->colPos= col*w;
-                win_params->plotparm->rowPos= row*h;
+               // win_params->plotparm->colPos= col*w;
+               // win_params->plotparm->rowPos= row*h;
         
-                myPrintf(" win=%d, col = %d, row=%d \n", count, col, row);
+                myPrintf(" win=%d, colPos=%d, rowPos=%d \n", count, win_params->plotparm->colPos, win_params->plotparm->rowPos );
+
                 SDL_RenderCopy(plot->renderer, win_params->plotparm->texTarget, &srect, &drect);
                 
 
@@ -284,8 +285,7 @@ void Plot::draw_window(splot *plot, Plot_Window_params *win_params) {
 
             ++count;
 
-            row = (int) (count) / nHoriz;
-            col = count % nHoriz;
+
             for(auto& kv : win_params->plotparm->points)
             {
                 if(kv.second.size())
