@@ -11,7 +11,6 @@
 #include <SDL2/SDL.h>
 #include "SDL_font.h"
 
-
  plotwinlist plotwin_list = NULL;
 /* ---- 8x8 font definition ---- */
 
@@ -626,7 +625,6 @@ void push_back_plot_win( plot_params* plotparm) {
     Plot_Window_params* plot_win_new_item = (Plot_Window_params*) malloc(sizeof (Plot_Window_params));
     plot_win_new_item->plotparm = plotparm;
 
-  
     plot_win_new_item->nxt = NULL;
 
     if (plotwin_list == NULL) {
