@@ -15,8 +15,7 @@ int main(int argc, char* argv[]) {
 
     printf("usage: %s number of graph \n", argv[0]);
 
-
-
+   
     {
         //populate caption list
         captionlist caption_list = NULL;
@@ -243,6 +242,27 @@ int main(int argc, char* argv[]) {
         coordinate_list = push_back_coord(coordinate_list, 0, 2, 3.9265e+3);
         coordinate_list = push_back_coord(coordinate_list, 0, 3, 3.9265e+4);
         coordinate_list = push_back_coord(coordinate_list, 0, 4, 3.9265e+5);
+
+
+        //populate plot parameter object
+        plot_params *params = new plot_params("Time (s)", "Speed (Mbit/s)", caption_list, coordinate_list,400,400);
+        //  Plot_Window_params win_param;
+        push_back_plot_win(params);
+
+    }
+
+    
+    {
+        captionlist caption_list = NULL;
+        caption_list = push_back_caption(caption_list, "live", 0, 0x0000FF);
+        coordlist coordinate_list = NULL;
+
+        coordinate_list = push_back_coord(coordinate_list, 0, -5, -9);
+        coordinate_list = push_back_coord(coordinate_list, 0, -4, -9);
+        coordinate_list = push_back_coord(coordinate_list, 0, -3, -9);
+        coordinate_list = push_back_coord(coordinate_list, 0, -2, -9);
+        coordinate_list = push_back_coord(coordinate_list, 0, 0, -9);
+
 
 
         //populate plot parameter object
